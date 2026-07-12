@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
-import { Person, Users, Wallet, CreditCard } from "@gravity-ui/icons";
+import { Person, Persons, Wallet, CreditCard } from "@gravity-ui/icons";
 
 export default function AdminHome() {
   const [stats, setStats] = useState(null);
@@ -38,7 +38,7 @@ export default function AdminHome() {
         </div>
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-green-600" />
+            <Persons className="w-5 h-5 text-green-600" />
             <div>
               <p className="text-sm text-gray-500">Creators</p>
               <p className="text-2xl font-bold">{stats ? stats.creators : "—"}</p>
