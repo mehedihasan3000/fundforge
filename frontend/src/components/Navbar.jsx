@@ -29,7 +29,7 @@ export default function Navbar() {
             )}
             {isLoggedIn && (
               <Link
-                href={`/dashboard/${user.role || "supporter"}`}
+                href={`/dashboard/${user.role || "supporter"}/home`}
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
                 Dashboard

@@ -1,14 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, Gear, Trash, CircleCheck, CircleXmark, Bell } from "@gravity-ui/icons";
+import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark, Bell } from "@gravity-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 
 const GITHUB_REPO = "https://github.com/your-username/fundforge";
 
 export default function DashboardLayout({ children }) {
-  const { user, credits, logout } = useAuth();
-  const role = user?.role || "supporter";
+  const { user, credits, logout, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user || !user.role) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500">
+        Please log in to access the dashboard.
+      </div>
+    );
+  }
+
+  const role = user.role;
   const navItems = getNavItems(role);
 
   return (
@@ -25,7 +42,7 @@ export default function DashboardLayout({ children }) {
             <Person className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-sm font-medium">{user?.name || "User"}</p>
+            <p className="text-sm font-medium">{user.name}</p>
             <p className="text-xs text-gray-500 capitalize">{role}</p>
           </div>
         </div>

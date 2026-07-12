@@ -30,36 +30,36 @@
 - [x] 3+ custom sections (How It Works, Explore by Category, Platform Impact in Numbers)
 - [x] Animations throughout the homepage
 
-## Phase 4: Creator Dashboard
+## Phase 4: Creator Dashboard ✅
 
-- [ ] Creator Dashboard Layout
-- [ ] Creator Home — stats (total campaigns, active campaigns, total raised)
-- [ ] Contributions to Review — pending table with Approve/Reject
-- [ ] Approve contribution → add to campaign raised, update status
-- [ ] Reject contribution → refund credits to supporter, update status
-- [ ] Add New Campaign form (imgBB upload)
-- [ ] Save campaign with status "pending"
-- [ ] My Campaigns — table sorted by deadline, Update/Delete buttons
-- [ ] Update campaign (title, story, rewardInfo)
-- [ ] Delete campaign (refund supporters + remove)
-- [ ] Withdrawals — show earnings, withdrawal form with auto-calc
-- [ ] Withdrawals — Stripe payment system dropdown
-- [ ] Withdrawal minimum 200 credits check
-- [ ] Payment History — table for creator
+- [x] Creator Dashboard Layout
+- [x] Creator Home — stats (total campaigns, active campaigns, total raised)
+- [x] Contributions to Review — pending table with Approve/Reject
+- [x] Approve contribution → add to campaign raised, update status
+- [x] Reject contribution → refund credits to supporter, update status
+- [x] Add New Campaign form (imgBB upload)
+- [x] Save campaign with status "pending"
+- [x] My Campaigns — table sorted by deadline, Update/Delete buttons
+- [x] Update campaign (title, story, rewardInfo)
+- [x] Delete campaign (refund supporters + remove)
+- [x] Withdrawals — show earnings, withdrawal form with auto-calc
+- [x] Withdrawals — Stripe payment system dropdown
+- [x] Withdrawal minimum 200 credits check
+- [x] Payment History — table for creator
 
-## Phase 5: Supporter Dashboard
+## Phase 5: Supporter Dashboard ✅
 
-- [ ] Supporter Dashboard Layout
-- [ ] Supporter Home — stats (total contributions, pending, approved amount)
-- [ ] Approved Contributions — table
-- [ ] Explore Campaigns — card grid (approved, not expired)
-- [ ] Campaign Details — full info + contribution form
-- [ ] Save contribution with status "pending"
-- [ ] My Contributions — table with highlighted status
-- [ ] Pagination on My Contributions page
-- [ ] Purchase Credits — Stripe card packages
-- [ ] Post-payment: save payment info + increase credits
-- [ ] Payment History — table for supporter
+- [x] Supporter Dashboard Layout
+- [x] Supporter Home — stats (total contributions, pending, approved amount)
+- [x] Approved Contributions — table
+- [x] Explore Campaigns — card grid (approved, not expired)
+- [x] Campaign Details — full info + contribution form
+- [x] Save contribution with status "pending"
+- [x] My Contributions — table with highlighted status
+- [x] Pagination on My Contributions page
+- [x] Purchase Credits — Stripe card packages
+- [x] Post-payment: save payment info + increase credits
+- [x] Payment History — table for supporter
 
 ## Phase 6: Admin Dashboard
 

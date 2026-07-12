@@ -1,6 +1,7 @@
 const { MongoClient } = require("mongodb");
 
 const uri = process.env.MONGODB_URI;
+const dbName = process.env.DB_NAME || "fundforge";
 const client = new MongoClient(uri, {
   serverSelectionTimeoutMS: 5000,
   connectTimeoutMS: 5000,
@@ -11,8 +12,8 @@ async function connectDB() {
   if (db) return db;
   try {
     await client.connect();
-    db = client.db();
-    console.log("MongoDB connected");
+    db = client.db(dbName);
+    console.log(`MongoDB connected — database: ${dbName}`);
     return db;
   } catch (err) {
     console.error("MongoDB connection error:", err.message);

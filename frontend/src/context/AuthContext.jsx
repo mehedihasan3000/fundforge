@@ -42,9 +42,11 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (name, email, password, image, role) => {
-    const { data, error } = await authClient.signUp.email({ name, email, password, image });
+    const credits = role === "creator" ? 20 : 50;
+    const { data, error } = await authClient.signUp.email({ name, email, password, image, role, credits });
     if (error) throw new Error(error.message || "Registration failed");
     setUser(data?.user || null);
+    setCredits(credits);
     return data;
   };
 

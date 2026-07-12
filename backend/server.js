@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { toNodeHandler } = require("better-auth/node");
-const { connectDB, getDB } = require("./config/db");
+const { connectDB } = require("./config/db");
 const { getAuth } = require("./config/auth");
 
 const app = express();
@@ -30,8 +30,14 @@ async function start() {
 
   const campaignRoutes = require("./routes/campaigns");
   const statsRoutes = require("./routes/stats");
+  const contributionRoutes = require("./routes/contributions");
+  const withdrawalRoutes = require("./routes/withdrawals");
+  const paymentRoutes = require("./routes/payments");
   app.use("/api/campaigns", campaignRoutes);
   app.use("/api/stats", statsRoutes);
+  app.use("/api/contributions", contributionRoutes);
+  app.use("/api/withdrawals", withdrawalRoutes);
+  app.use("/api/payments", paymentRoutes);
 
   app.all("/api/auth/*splat", (req, res, next) => {
     if (!req.path.startsWith("/api/auth/")) return next();
