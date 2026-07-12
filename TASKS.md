@@ -61,16 +61,16 @@
 - [x] Post-payment: save payment info + increase credits
 - [x] Payment History — table for supporter
 
-## Phase 6: Admin Dashboard
+## Phase 6: Admin Dashboard ✅
 
-- [ ] Admin Dashboard Layout
-- [ ] Admin Home — stats (total supporters, creators, credits, payments)
-- [ ] Manage Users — table with Remove and Update Role
-- [ ] Manage Campaigns — table with Delete Campaign
-- [ ] Campaign Approvals — approve/reject pending campaigns
-- [ ] Withdrawal Requests — approve pending withdrawals
-- [ ] Approve withdrawal → decrease creator's raised credits
-- [ ] Reports — view reported campaigns, suspend/delete
+- [x] Admin Dashboard Layout
+- [x] Admin Home — stats (total supporters, creators, credits, payments)
+- [x] Manage Users — table with Remove and Update Role
+- [x] Manage Campaigns — table with Delete Campaign
+- [x] Campaign Approvals — approve/reject pending campaigns
+- [x] Withdrawal Requests — approve pending withdrawals
+- [x] Approve withdrawal → decrease creator's raised credits
+- [x] Reports — view reported campaigns, suspend/delete
 
 ## Phase 7: Notifications & Email
 
