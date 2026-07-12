@@ -1,26 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark, Bell } from "@gravity-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 
-const GITHUB_REPO = "https://github.com/your-username/fundforge";
+const GITHUB_REPO = "https://github.com/mehedihasan3000/fundforge";
 
 export default function DashboardLayout({ children }) {
   const { user, credits, logout, loading } = useAuth();
+  const pathname = usePathname();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-500">
-        Loading...
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-500">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (!user || !user.role) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-500">
-        Please log in to access the dashboard.
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">Please log in to access the dashboard.</p>
+          <Link href="/login" className="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">
+            Go to Login
+          </Link>
+        </div>
       </div>
     );
   }
@@ -30,48 +42,60 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <aside className="w-64 bg-white border-r flex flex-col">
-        <div className="p-4 border-b">
-          <Link href="/" className="text-xl font-bold text-indigo-600">
+      <aside className="w-64 bg-white border-r flex flex-col shrink-0">
+        <div className="p-4 border-b flex items-center gap-2">
+          <span className="w-6 h-6 bg-indigo-600 rounded" />
+          <Link href="/" className="text-lg font-bold text-indigo-600">
             FundForge
           </Link>
         </div>
 
         <div className="flex items-center gap-3 px-4 py-3 border-b">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-600">
-            <Person className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-600 overflow-hidden">
+            {user.photoUrl ? (
+              <img src={user.photoUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <Person className="w-4 h-4" />
+            )}
           </div>
-          <div>
-            <p className="text-sm font-medium">{user.name}</p>
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">{user.name}</p>
             <p className="text-xs text-gray-500 capitalize">{role}</p>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-2.5 px-3 py-2.5 text-sm rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-700 font-semibold"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+                <span className={isActive ? "text-indigo-600" : "text-gray-400"}>{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="p-4 border-t space-y-2">
-          <p className="text-sm text-gray-600 flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-green-600" />
-            Credits: <span className="font-semibold text-green-600">{credits}</span>
-          </p>
+        <div className="p-4 border-t space-y-3">
+          <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2.5">
+            <span className="text-sm text-gray-600">Credits</span>
+            <span className="text-sm font-bold text-green-700">{credits}</span>
+          </div>
           <a
             href={GITHUB_REPO}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+            className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <LogoGithub className="w-4 h-4" />
+            <LogoGithub className="w-3.5 h-3.5" />
             Join as Developer
           </a>
         </div>
@@ -79,10 +103,26 @@ export default function DashboardLayout({ children }) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b px-6 py-3 flex items-center justify-end gap-4">
-          <Bell className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700" />
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Bell className="w-5 h-5 text-gray-500" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
+            </button>
+            {showNotifications && (
+              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border z-50">
+                <div className="p-3 border-b">
+                  <p className="text-sm font-semibold">Notifications</p>
+                </div>
+                <p className="text-xs text-gray-400 text-center py-6">No notifications</p>
+              </div>
+            )}
+          </div>
           <button
             onClick={logout}
-            className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1"
+            className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
           >
             <Xmark className="w-4 h-4" />
             Logout

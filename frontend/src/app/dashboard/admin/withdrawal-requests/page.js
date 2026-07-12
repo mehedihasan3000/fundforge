@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
+import { CircleCheck, CircleXmark } from "@gravity-ui/icons";
 
 export default function WithdrawalRequests() {
   const [withdrawals, setWithdrawals] = useState([]);
@@ -21,36 +22,53 @@ export default function WithdrawalRequests() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Withdrawal Requests</h1>
-      <div className="bg-white rounded-lg border overflow-hidden">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Withdrawal Requests</h1>
+        <p className="text-sm text-gray-500 mt-1">Review and process creator withdrawal requests</p>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Creator</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Credits</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Amount ($)</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Payment</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Account</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Date</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Actions</th>
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Creator</th>
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Credits</th>
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount ($)</th>
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</th>
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {withdrawals.map((w) => (
-              <tr key={w._id} className="border-b last:border-0">
-                <td className="px-4 py-3 text-sm">{w.creatorName}</td>
-                <td className="px-4 py-3 text-sm">{w.withdrawalCredit}</td>
-                <td className="px-4 py-3 text-sm">${w.withdrawalAmount?.toFixed(2)}</td>
-                <td className="px-4 py-3 text-sm">{w.paymentSystem}</td>
-                <td className="px-4 py-3 text-sm">{w.accountNumber}</td>
-                <td className="px-4 py-3 text-sm">{new Date(w.withdrawDate).toLocaleDateString()}</td>
-                <td className="px-4 py-3 text-sm">
-                  <button onClick={() => approve(w._id)} className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Payment Success</button>
+              <tr key={w._id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3.5 text-sm font-medium text-gray-900">{w.creatorName}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-700">{w.withdrawalCredit}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-700">${w.withdrawalAmount?.toFixed(2)}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-600">{w.paymentSystem}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-600 font-mono">{w.accountNumber}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-500">{new Date(w.withdrawDate).toLocaleDateString()}</td>
+                <td className="px-4 py-3.5 text-sm">
+                  <button
+                    onClick={() => approve(w._id)}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <CircleCheck className="w-3.5 h-3.5" />
+                    Approve
+                  </button>
                 </td>
               </tr>
             ))}
             {withdrawals.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-500">No pending withdrawals</td></tr>
+              <tr>
+                <td colSpan={7}>
+                  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <CircleXmark className="w-8 h-8 mb-2" />
+                    <p className="text-sm">No pending withdrawals</p>
+                  </div>
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
