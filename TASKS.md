@@ -1,5 +1,14 @@
 # FundForge - Project Roadmap
 
+## Ground Rules
+
+Before making **any changes** to this project, you MUST first read and understand these three files in full:
+1. `TASKS.md` — the project roadmap and current phase
+2. `FundForge.md` — the complete requirements specification
+3. `.opencoderules` — this file, containing all conventions, rules, and architecture decisions
+
+Only after confirming you understand the relevant sections should you proceed with implementation.
+
 ## Phase 1: Project Setup ✅
 
 - [x] Initialize Next.js frontend with App Router
