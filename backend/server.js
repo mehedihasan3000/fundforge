@@ -1,24 +1,17 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { toNodeHandler, fromNodeHeaders } = require("better-auth/node");
+const { toNodeHandler } = require("better-auth/node");
 const { connectDB, getDB } = require("./config/db");
 const { getAuth } = require("./config/auth");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-  })
-);
-
-app.all("/api/auth/*splat", (req, res) => {
-  const auth = getAuth();
-  return toNodeHandler(auth)(req, res);
-});
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  credentials: true,
+}));
 
 app.use(express.json());
 
@@ -34,6 +27,23 @@ async function start() {
     console.error("MongoDB connection failed:", err.message);
     console.log("Server will start without database. Set MONGODB_URI in .env");
   }
+
+  const campaignRoutes = require("./routes/campaigns");
+  const statsRoutes = require("./routes/stats");
+  app.use("/api/campaigns", campaignRoutes);
+  app.use("/api/stats", statsRoutes);
+
+  app.all("/api/auth/*splat", (req, res, next) => {
+    if (!req.path.startsWith("/api/auth/")) return next();
+    try {
+      const auth = getAuth();
+      return toNodeHandler(auth)(req, res);
+    } catch (err) {
+      console.error("Auth handler error:", err.message);
+      return res.status(500).json({ message: "Auth error" });
+    }
+  });
+
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

@@ -1,10 +1,19 @@
+import HeroSection from "@/components/HeroSection";
+import TopCampaigns from "@/components/TopCampaigns";
+import HowItWorks from "@/components/HowItWorks";
+import CategorySection from "@/components/CategorySection";
+import ImpactSection from "@/components/ImpactSection";
+import Testimonials from "@/components/Testimonials";
+
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <h1 className="text-4xl font-bold text-gray-900">FundForge</h1>
-      <p className="mt-2 text-lg text-gray-600">
-        Crowdfunding made simple
-      </p>
-    </div>
+    <>
+      <HeroSection />
+      <TopCampaigns />
+      <HowItWorks />
+      <CategorySection />
+      <ImpactSection />
+      <Testimonials />
+    </>
   );
 }
