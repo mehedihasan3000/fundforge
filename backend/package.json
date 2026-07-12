@@ -1,0 +1,19 @@
+{
+  "name": "fundforge-backend",
+  "version": "1.0.0",
+  "description": "FundForge crowdfunding platform API",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-auth": "^1.6.23",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "mongodb": "^6.15.0",
+    "nodemailer": "^6.10.1",
+    "stripe": "^18.0.0"
+  }
+}

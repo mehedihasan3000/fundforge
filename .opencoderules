@@ -1,0 +1,190 @@
+# FundForge - Crowdfunding Platform
+
+## Ground Rules
+
+Before making **any changes** to this project, you MUST first read and understand these three files in full:
+1. `TASKS.md` — the project roadmap and current phase
+2. `FundForge.md` — the complete requirements specification
+3. `.opencoderules` — this file, containing all conventions, rules, and architecture decisions
+
+Only after confirming you understand the relevant sections should you proceed with implementation.
+
+## Tech Stack
+- Next.js (JavaScript) - Frontend framework
+- BetterAuth - Authentication
+- Tailwind CSS - Styling
+- Gravity UI Icons - Icon library
+- Express.js (JavaScript) - Backend API
+- MongoDB - Database (do NOT use Mongoose, use native MongoDB driver)
+- Swiper Slider - Carousels/sliders
+- Stripe - Payment processing
+- imgBB - Image uploading
+- Nodemailer - Email notifications
+
+## Project Structure
+```
+/backend          - Express.js API server
+  /config         - DB config, middleware
+  /controllers    - Route handlers
+  /models         - MongoDB schemas/helpers (no Mongoose)
+  /routes         - Express route definitions
+  /middleware     - Auth & RBAC middleware
+  /utils          - Email, notifications helpers
+/frontend         - Next.js app
+  /src
+    /app          - App router pages
+    /components   - Reusable React components
+    /context      - React contexts (auth, etc.)
+    /lib          - Utilities, API client
+    /hooks        - Custom hooks
+  /public         - Static assets
+```
+
+## Core Data Models (MongoDB Collections)
+
+### users
+```
+{ name, email, password, photoUrl, role: "supporter"|"creator"|"admin", credits: Number, createdAt }
+```
+- Supporter gets 50 credits on registration, Creator gets 20.
+
+### campaigns
+```
+{ title, story, category, fundingGoal, minimumContribution, deadline, rewardInfo, imageUrl, creatorEmail, creatorName, amountRaised: 0, status: "pending"|"approved"|"rejected", createdAt }
+```
+
+### contributions
+```
+{ campaignId, campaignTitle, contributionAmount, supporterEmail, supporterName, creatorName, creatorEmail, date, status: "pending"|"approved"|"rejected" }
+```
+
+### withdrawals
+```
+{ creatorEmail, creatorName, withdrawalCredit, withdrawalAmount, paymentSystem, accountNumber, withdrawDate, status: "pending"|"approved" }
+```
+
+### payments
+```
+{ userEmail, userName, credits, amount, stripePaymentId, date }
+```
+
+### notifications
+```
+{ message: String, toEmail: String, actionRoute: String, time: Date }
+```
+
+### reports
+```
+{ supporterEmail, supporterName, campaignId, campaignTitle, reason, date }
+```
+
+## Routing / Pages
+
+### Public Routes (Basic Layout)
+- `/` - Home page (Hero slider, Top 6 funded campaigns, Testimonials, 3 custom sections)
+- `/login` - Login (email/password + Google OAuth)
+- `/register` - Registration (name, email, photoUrl, password, role dropdown)
+
+### Dashboard Routes (Dashboard Layout)
+**Supporter:** `/dashboard/supporter/home`, `/dashboard/supporter/explore`, `/dashboard/supporter/campaign/[id]`, `/dashboard/supporter/contributions`, `/dashboard/supporter/purchase-credits`, `/dashboard/supporter/payment-history`
+
+**Creator:** `/dashboard/creator/home`, `/dashboard/creator/add-campaign`, `/dashboard/creator/my-campaigns`, `/dashboard/creator/withdrawals`, `/dashboard/creator/payment-history`
+
+**Admin:** `/dashboard/admin/home`, `/dashboard/admin/manage-users`, `/dashboard/admin/manage-campaigns`, `/dashboard/admin/withdrawal-requests`, `/dashboard/admin/reports`
+
+## Navbar Rules
+- **Not logged in:** Logo, Explore Campaigns, Login, Register, "Join as Developer" (links to GitHub repo)
+- **Logged in:** Logo (links to home), Dashboard, Available Credits, User Profile + Logout, "Join as Developer"
+
+## Business Logic
+- 10 credits = $1 (purchase rate)
+- 20 credits = $1 (withdrawal rate for creators)
+- Minimum 200 credits to withdraw
+- New campaigns saved as "pending", visible only after admin approval
+- Approving contribution: add amount to campaign's amountRaised, set status "approved"
+- Rejecting contribution: set status "rejected", refund credits to supporter
+- Deleting a campaign: refund all approved supporters
+- Admin approves withdrawal: decrease creator's raised credits by withdrawal amount
+
+## Feature Implementation Rules
+
+### Authentication (BetterAuth)
+- Registration: form fields + Google OAuth
+- Login: email/password + Google Sign-In
+- Input validation: email format, password strength, existing email check
+- Redirect to dashboard after login/registration
+- No credit re-issuance (only once on registration)
+
+### Home Page
+- Hero section with Swiper slider (3 banners) or background video
+- Top 6 funded campaigns section (by amountRaised), show cover image, title, total raised
+- Testimonial section with Swiper (static data, photo + name + quote)
+- Minimum 3 extra custom sections (e.g. "How It Works", "Explore by Category", "Platform Impact in Numbers")
+- Home page must include animations
+
+### Creator Dashboard
+- **Home:** total campaigns, active campaigns (deadline not passed), total raised
+- **Contributions to Review:** table of pending contributions with Approve/Reject buttons + View Contribution modal
+- **Add New Campaign:** form with title, story, category, fundingGoal, minimumContribution, deadline, rewardInfo, imageUrl (imgBB upload)
+- **My Campaigns:** table sorted by deadline descending, Update (title/story/rewardInfo) and Delete (refund supporters + delete campaign) buttons
+- **Withdrawals:** show earnings (credits + dollar equivalent), withdrawal form (creditsToWithdraw, auto-calc $, Stripe dropdown, account number), Withdraw button or "Insufficient credit" text
+- **Payment History:** table of all withdrawal payments
+
+### Supporter Dashboard
+- **Home:** total contributions count, pending count, approved total amount
+- **Approved Contributions:** table of approved contributions (campaignTitle, amount, creatorName, status)
+- **Explore Campaigns:** card grid of approved + not-expired campaigns (title, creator, deadline, goal, raised, View Details)
+- **Campaign Details:** full campaign info + contribution form (amount input → saves with status "pending")
+- **My Contributions:** table of all user contributions (paginated), highlight status
+- **Purchase Credits:** Stripe cards (100cr/$10, 300cr/$25, 800cr/$60, 1500cr/$110), on success save payment + increase credits
+- **Payment History:** table of all payments
+
+### Admin Dashboard
+- **Home:** total supporters, total creators, total available credits, total payments processed
+- **Manage Users:** table (name, email, photo, role, credits) + Remove + Update Role dropdown
+- **Manage Campaigns:** table + Delete Campaign button
+- **Withdrawal Requests:** table of pending withdrawals + Payment Success button (approve + decrease creator credits)
+- **Reports:** table (reporter, campaignTitle, reason, date) + Suspend/Delete buttons
+
+### Notifications
+- Creator approves/rejects contribution → notify supporter
+- Admin approves withdrawal → notify creator
+- Admin approves/rejects campaign → notify creator
+- Supporter creates contribution → notify creator
+- Store in notifications collection with { message, toEmail, actionRoute, time }
+- Notification icon shows matching notifications sorted descending
+- Floating popup, click away to dismiss
+
+### Image Upload (imgBB)
+- On registration (profile picture)
+- On Add New Campaign (campaign image)
+
+### Email Notifications (Nodemailer)
+- Campaign approval/rejection
+- Contribution confirmation
+- Withdrawal processing
+
+### Search & Filter
+- Campaign search/filter by category, deadline, fundingGoal, status
+- Use MongoDB aggregation pipeline on server side
+
+### Report System
+- Supporters can report suspicious campaigns
+- Admin views reports with reporter info, campaign, reason, date
+- Admin can suspend or delete reported campaigns
+
+### Authorization
+- RBAC middleware: protect routes by role (supporter, creator, admin)
+- Each dashboard route accessible only by its role
+- API endpoints verify user role from token/session
+
+## Code Conventions
+- JavaScript only (no TypeScript)
+- No Mongoose — use native `mongodb` driver (client.connect, db.collection, etc.)
+- Use ES modules or CommonJS consistently
+- Tailwind CSS utility classes for styling
+- Gravity UI Icons for icons
+- Server-side logic in Express.js backend
+- Client-side in Next.js (App Router)
+- Component-based React architecture
+- Reusable layout components (BasicLayout, DashboardLayout)
