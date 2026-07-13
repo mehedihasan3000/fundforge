@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const { getDB } = require("../config/db");
+const { notifyWithdrawalProcessed } = require("../utils/email");
 
 async function createWithdrawal(req, res) {
   try {
@@ -78,6 +79,7 @@ async function approveWithdrawal(req, res) {
       actionRoute: "/dashboard/creator/withdrawals",
       time: new Date(),
     });
+    notifyWithdrawalProcessed(withdrawal.creatorEmail, withdrawal.withdrawalAmount).catch(() => {});
     res.json({ message: "Withdrawal approved" });
   } catch (err) {
     res.status(500).json({ message: err.message });

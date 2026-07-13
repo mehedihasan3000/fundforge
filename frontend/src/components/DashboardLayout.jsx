@@ -2,16 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark, Bell } from "@gravity-ui/icons";
+import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark } from "@gravity-ui/icons";
 import { useAuth } from "@/context/AuthContext";
+import NotificationPopup from "@/components/NotificationPopup";
 
 const GITHUB_REPO = "https://github.com/mehedihasan3000/fundforge";
 
 export default function DashboardLayout({ children }) {
   const { user, credits, logout, loading } = useAuth();
   const pathname = usePathname();
-  const [showNotifications, setShowNotifications] = useState(false);
 
   if (loading) {
     return (
@@ -103,23 +102,7 @@ export default function DashboardLayout({ children }) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b px-6 py-3 flex items-center justify-end gap-4">
-          <div className="relative">
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <Bell className="w-5 h-5 text-gray-500" />
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border z-50">
-                <div className="p-3 border-b">
-                  <p className="text-sm font-semibold">Notifications</p>
-                </div>
-                <p className="text-xs text-gray-400 text-center py-6">No notifications</p>
-              </div>
-            )}
-          </div>
+          <NotificationPopup />
           <button
             onClick={logout}
             className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"

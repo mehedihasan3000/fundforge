@@ -35,6 +35,7 @@ async function start() {
   const paymentRoutes = require("./routes/payments");
   const userRoutes = require("./routes/users");
   const reportRoutes = require("./routes/reports");
+  const notificationRoutes = require("./routes/notifications");
   app.use("/api/campaigns", campaignRoutes);
   app.use("/api/stats", statsRoutes);
   app.use("/api/contributions", contributionRoutes);
@@ -42,6 +43,7 @@ async function start() {
   app.use("/api/payments", paymentRoutes);
   app.use("/api/users", userRoutes);
   app.use("/api/reports", reportRoutes);
+  app.use("/api/notifications", notificationRoutes);
 
   app.all("/api/auth/*splat", (req, res, next) => {
     if (!req.path.startsWith("/api/auth/")) return next();

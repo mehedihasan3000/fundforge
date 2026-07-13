@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const { getDB } = require("../config/db");
+const { notifyContributionConfirmation } = require("../utils/email");
 
 async function createContribution(req, res) {
   try {
@@ -34,6 +35,7 @@ async function createContribution(req, res) {
       actionRoute: "/dashboard/creator/home",
       time: new Date(),
     });
+    notifyContributionConfirmation(creatorEmail, campaignTitle, contributionAmount).catch(() => {});
     res.status(201).json({ ...contribution, _id: result.insertedId });
   } catch (err) {
     res.status(500).json({ message: err.message });

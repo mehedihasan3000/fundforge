@@ -81,18 +81,18 @@ Only after confirming you understand the relevant sections should you proceed wi
 - [x] Approve withdrawal → decrease creator's raised credits
 - [x] Reports — view reported campaigns, suspend/delete
 
-## Phase 7: Notifications & Email
+## Phase 7: Notifications & Email ✅
 
-- [ ] Notification model and API
-- [ ] Notify supporter on contribution approval/rejection
-- [ ] Notify creator on new contribution
-- [ ] Notify creator on campaign approval/rejection
-- [ ] Notify creator on withdrawal approval
-- [ ] Notification popup UI (floating, click-away dismiss)
-- [ ] Set up Nodemailer
-- [ ] Email on campaign approval/rejection
-- [ ] Email on contribution confirmation
-- [ ] Email on withdrawal processing
+- [x] Notification model and API
+- [x] Notify supporter on contribution approval/rejection
+- [x] Notify creator on new contribution
+- [x] Notify creator on campaign approval/rejection
+- [x] Notify creator on withdrawal approval
+- [x] Notification popup UI (floating, click-away dismiss)
+- [x] Set up Nodemailer
+- [x] Email on campaign approval/rejection
+- [x] Email on contribution confirmation
+- [x] Email on withdrawal processing
 
 ## Phase 8: Search, Filter & Report
 

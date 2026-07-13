@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const { getDB } = require("../config/db");
+const { notifyCampaignApproval, notifyCampaignRejection } = require("../utils/email");
 
 async function getTopCampaigns(req, res) {
   try {
@@ -139,6 +140,7 @@ async function approveCampaign(req, res) {
       actionRoute: "/dashboard/creator/my-campaigns",
       time: new Date(),
     });
+    notifyCampaignApproval(campaign.creatorEmail, campaign.title).catch(() => {});
     res.json({ message: "Campaign approved" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -157,6 +159,7 @@ async function rejectCampaign(req, res) {
       actionRoute: "/dashboard/creator/my-campaigns",
       time: new Date(),
     });
+    notifyCampaignRejection(campaign.creatorEmail, campaign.title).catch(() => {});
     res.json({ message: "Campaign rejected" });
   } catch (err) {
     res.status(500).json({ message: err.message });
