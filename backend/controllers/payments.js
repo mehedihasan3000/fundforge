@@ -83,13 +83,20 @@ async function confirmCheckoutSession(req, res) {
       date: new Date(),
     };
     await db.collection("payments").insertOne(payment);
-    await db.collection("users").updateOne(
+
+    const result = await db.collection("user").updateOne(
       { email: req.user.email },
       { $inc: { credits: Number(session.metadata.credits) } }
     );
 
+    if (result.matchedCount === 0) {
+      console.error(`User not found for email: ${req.user.email}`);
+      return res.status(404).json({ message: "User not found in database" });
+    }
+
     res.json({ message: "Payment confirmed, credits added", credits: Number(session.metadata.credits) });
   } catch (err) {
+    console.error("confirmCheckoutSession error:", err);
     res.status(500).json({ message: err.message });
   }
 }

@@ -21,6 +21,20 @@ export default function ManageCampaigns() {
     } catch (err) { alert(err.message); }
   }
 
+  async function handleApprove(id) {
+    try {
+      await api.put(`/api/campaigns/${id}/approve`);
+      load();
+    } catch (err) { alert(err.message); }
+  }
+
+  async function handleReject(id) {
+    try {
+      await api.put(`/api/campaigns/${id}/reject`);
+      load();
+    } catch (err) { alert(err.message); }
+  }
+
   function getStatusBadge(status) {
     const badges = {
       pending: { icon: <Clock className="w-3 h-3" />, bg: "bg-yellow-100 text-yellow-800" },
@@ -64,13 +78,33 @@ export default function ManageCampaigns() {
                 <td className="px-4 py-3.5 text-sm text-gray-600">{c.amountRaised || 0} cr</td>
                 <td className="px-4 py-3.5 text-sm">{getStatusBadge(c.status)}</td>
                 <td className="px-4 py-3.5 text-sm">
-                  <button
-                    onClick={() => handleDelete(c._id)}
-                    className="flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-800 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                  >
-                    <TrashBin className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {c.status === "pending" && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(c._id)}
+                          className="flex items-center gap-1 text-xs font-medium text-green-600 hover:text-green-800 px-2.5 py-1.5 rounded-lg hover:bg-green-50 transition-colors"
+                        >
+                          <CircleCheck className="w-3.5 h-3.5" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(c._id)}
+                          className="flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-800 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                        >
+                          <CircleXmark className="w-3.5 h-3.5" />
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => handleDelete(c._id)}
+                      className="flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-red-600 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                    >
+                      <TrashBin className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

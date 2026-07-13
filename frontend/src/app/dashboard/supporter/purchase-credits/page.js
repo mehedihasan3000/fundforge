@@ -33,8 +33,10 @@ function PurchaseCreditsInner() {
     const canceled = searchParams.get("canceled");
 
     if (sessionId) {
-      confirmSession(sessionId);
-      router.replace("/dashboard/supporter/purchase-credits");
+      (async () => {
+        await confirmSession(sessionId);
+        router.replace("/dashboard/supporter/purchase-credits");
+      })();
     }
 
     if (canceled) {
