@@ -1,7 +1,7 @@
 if (process.env.VERCEL !== "1") require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { toNodeHandler } = require("better-auth/node");
+const _nodeHandlerPromise = import("better-auth/node").then((m) => ({ toNodeHandler: m.toNodeHandler }));
 const { connectDB } = require("./config/db");
 const { getAuth } = require("./config/auth");
 
@@ -19,50 +19,53 @@ app.get("/", (req, res) => {
   res.json({ message: "FundForge API is running" });
 });
 
+const campaignRoutes = require("./routes/campaigns");
+const statsRoutes = require("./routes/stats");
+const contributionRoutes = require("./routes/contributions");
+const withdrawalRoutes = require("./routes/withdrawals");
+const paymentRoutes = require("./routes/payments");
+const userRoutes = require("./routes/users");
+const reportRoutes = require("./routes/reports");
+const notificationRoutes = require("./routes/notifications");
+
+app.use("/api/campaigns", campaignRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/contributions", contributionRoutes);
+app.use("/api/withdrawals", withdrawalRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+app.all(/^\/api\/auth(\/.*)?$/, async (req, res, next) => {
+  try {
+    const { toNodeHandler } = await _nodeHandlerPromise;
+    const auth = await getAuth();
+    return toNodeHandler(auth)(req, res);
+  } catch (err) {
+    console.error("Auth handler error:", err.message);
+    return res.status(500).json({ message: "Auth error" });
+  }
+});
+
+app.use("/api", (req, res) => {
+  res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
+});
+
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.message);
+  res.status(500).json({ message: "Internal server error" });
+});
+
 async function start() {
   try {
     await connectDB();
-    getAuth();
+    await getAuth();
+    console.log("MongoDB connected — database:", process.env.DB_NAME);
   } catch (err) {
     console.error("MongoDB connection failed:", err.message);
     console.log("Server will start without database. Set MONGODB_URI in .env");
   }
-
-  const campaignRoutes = require("./routes/campaigns");
-  const statsRoutes = require("./routes/stats");
-  const contributionRoutes = require("./routes/contributions");
-  const withdrawalRoutes = require("./routes/withdrawals");
-  const paymentRoutes = require("./routes/payments");
-  const userRoutes = require("./routes/users");
-  const reportRoutes = require("./routes/reports");
-  const notificationRoutes = require("./routes/notifications");
-  app.use("/api/campaigns", campaignRoutes);
-  app.use("/api/stats", statsRoutes);
-  app.use("/api/contributions", contributionRoutes);
-  app.use("/api/withdrawals", withdrawalRoutes);
-  app.use("/api/payments", paymentRoutes);
-  app.use("/api/users", userRoutes);
-  app.use("/api/reports", reportRoutes);
-  app.use("/api/notifications", notificationRoutes);
-
-  app.all(/^\/api\/auth(\/.*)?$/, (req, res, next) => {
-    try {
-      const auth = getAuth();
-      return toNodeHandler(auth)(req, res);
-    } catch (err) {
-      console.error("Auth handler error:", err.message);
-      return res.status(500).json({ message: "Auth error" });
-    }
-  });
-
-  app.use("/api", (req, res) => {
-    res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
-  });
-
-  app.use((err, req, res, next) => {
-    console.error("Unhandled error:", err.message);
-    res.status(500).json({ message: "Internal server error" });
-  });
 
   if (process.env.VERCEL !== "1") {
     app.listen(PORT, () => {
@@ -72,8 +75,6 @@ async function start() {
 }
 
 if (process.env.VERCEL !== "1") start();
-else {
-  start().catch((err) => console.error("Startup error:", err));
-}
+else start().catch((err) => console.error("Startup error:", err));
 
 module.exports = app;

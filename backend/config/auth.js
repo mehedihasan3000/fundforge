@@ -1,13 +1,15 @@
-const { betterAuth } = require("better-auth");
-const { mongodbAdapter } = require("@better-auth/mongo-adapter");
 const { getDB } = require("./db");
 
 let authInstance;
 
-function getAuth() {
+const _betterAuthPromise = import("better-auth").then((m) => m.betterAuth);
+const _mongoAdapterPromise = import("@better-auth/mongo-adapter").then((m) => m.mongodbAdapter);
+
+async function getAuth() {
   if (authInstance) return authInstance;
 
   const db = getDB();
+  const [betterAuth, mongodbAdapter] = await Promise.all([_betterAuthPromise, _mongoAdapterPromise]);
 
   authInstance = betterAuth({
     database: mongodbAdapter(db),
