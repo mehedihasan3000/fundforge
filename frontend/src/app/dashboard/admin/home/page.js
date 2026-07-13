@@ -18,7 +18,7 @@ function StatSkeleton() {
 }
 
 export default function AdminHome() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({ supporters: 0, creators: 0, totalCredits: 0, totalPayments: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

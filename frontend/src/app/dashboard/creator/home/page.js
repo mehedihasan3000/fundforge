@@ -20,7 +20,7 @@ function StatSkeleton() {
 
 export default function CreatorHome() {
   const { user } = useAuth();
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({ total: 0, active: 0, raised: 0 });
   const [pendingContributions, setPendingContributions] = useState([]);
   const [viewing, setViewing] = useState(null);
   const [loading, setLoading] = useState(true);

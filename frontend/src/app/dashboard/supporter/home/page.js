@@ -20,7 +20,7 @@ function StatSkeleton() {
 
 export default function SupporterHome() {
   const { user } = useAuth();
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [approved, setApproved] = useState([]);
   const [loading, setLoading] = useState(true);
 

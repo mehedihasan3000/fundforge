@@ -1,9 +1,8 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
 async function request(endpoint, options = {}) {
-  const url = `${API_URL}${endpoint}`;
+  const url = `${endpoint}`;
   const config = {
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     ...options,
   };
   const res = await fetch(url, config);
