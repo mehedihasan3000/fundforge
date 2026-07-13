@@ -3,8 +3,8 @@ const { MongoClient } = require("mongodb");
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME || "fundforge";
 const client = new MongoClient(uri, {
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 10000,
+  connectTimeoutMS: 10000,
 });
 let db;
 

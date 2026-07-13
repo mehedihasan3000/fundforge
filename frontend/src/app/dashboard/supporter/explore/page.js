@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import { Eye, Magnifier } from "@gravity-ui/icons";
 
@@ -46,7 +47,7 @@ export default function ExploreCampaigns() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-50">
           <label className="block text-xs font-medium text-gray-500 mb-1">Search</label>
           <div className="relative">
             <Magnifier className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -97,15 +98,15 @@ export default function ExploreCampaigns() {
           return (
             <div key={c._id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col">
               {c.imageUrl ? (
-                <div className="relative">
-                  <img src={c.imageUrl} alt={c.title} className="w-full h-48 object-cover" />
+                  <div className="relative w-full h-48">
+                  <Image src={c.imageUrl} alt={c.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" unoptimized />
                   <span className="absolute top-3 left-3 bg-indigo-600 text-white text-xs font-medium px-2.5 py-0.5 rounded-full">{c.category}</span>
                   {daysLeft <= 7 && daysLeft > 0 && (
                     <span className="absolute top-3 right-3 bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full">{daysLeft}d left</span>
                   )}
                 </div>
               ) : (
-                <div className="w-full h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                <div className="w-full h-48 bg-linear-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
                   <Eye className="w-10 h-10 text-indigo-300" />
                 </div>
               )}
