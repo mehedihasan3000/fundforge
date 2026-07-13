@@ -101,10 +101,15 @@ Only after confirming you understand the relevant sections should you proceed wi
 - [x] Report system — supporter can report campaigns
 - [x] Admin reports page — view and manage reported campaigns
 
-## Phase 9: Polish & Deployment
+## Phase 9: Polish & Deployment ✅
 
-- [ ] Responsive design pass
-- [ ] Error handling and loading states
-- [ ] Performance optimization
-- [ ] Final testing
-- [ ] Deploy
+- [x] Create `.env.example` files (frontend + backend)
+- [x] Fix `next.config.mjs` proxy — use env-based `API_URL`
+- [x] Move hardcoded imgBB + Stripe keys to environment variables
+- [x] Create `vercel.json` for frontend deployment
+- [x] Replace all `alert()` calls with inline Toast notification system
+- [x] Add `error.js` route-level error boundaries (dashboard + admin/creator/supporter)
+- [x] Add `loading.js` route-level loading files (dashboard + admin/creator/supporter)
+- [x] Add inline error states to pages with silent error swallowing
+- [x] DashboardLayout mobile sidebar toggle (hamburger menu)
+- [x] Wrap all `<table>` elements in `overflow-x-auto` for responsive tables

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark } from "@gravity-ui/icons";
+import { useEffect, useState } from "react";
+import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark, Bars } from "@gravity-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import NotificationPopup from "@/components/NotificationPopup";
 
@@ -12,6 +12,7 @@ const GITHUB_REPO = "https://github.com/mehedihasan3000/fundforge";
 export default function DashboardLayout({ children }) {
   const { user, credits, logout, loading, refreshUser } = useAuth();
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const onVisible = () => { if (!document.hidden) refreshUser(); };
@@ -48,7 +49,10 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <aside className="w-64 bg-white border-r flex flex-col shrink-0">
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+      <aside className={`w-64 bg-white border-r flex flex-col shrink-0 fixed lg:static inset-y-0 left-0 z-40 transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-4 border-b flex items-center gap-2">
           <span className="w-6 h-6 bg-indigo-600 rounded" />
           <Link href="/" className="text-lg font-bold text-indigo-600">
@@ -108,7 +112,15 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b px-6 py-3 flex items-center justify-end gap-4">
+        <header className="bg-white border-b px-4 lg:px-6 py-3 flex items-center gap-4">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
+            aria-label="Open sidebar"
+          >
+            <Bars className="w-5 h-5" />
+          </button>
+          <div className="flex-1" />
           <NotificationPopup />
           <button
             onClick={logout}

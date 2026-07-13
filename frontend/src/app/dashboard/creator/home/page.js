@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { ChartLine, Clock, Wallet, Eye, Xmark } from "@gravity-ui/icons";
 
@@ -20,10 +21,12 @@ function StatSkeleton() {
 
 export default function CreatorHome() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [stats, setStats] = useState({ total: 0, active: 0, raised: 0 });
   const [pendingContributions, setPendingContributions] = useState([]);
   const [viewing, setViewing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -34,7 +37,7 @@ export default function CreatorHome() {
         const raised = campaigns.reduce((sum, c) => sum + (c.amountRaised || 0), 0);
         setStats({ total, active, raised });
       } catch (err) {
-        console.error("Failed to load stats:", err);
+        setLoadError(err.message);
       } finally {
         setLoading(false);
       }
@@ -48,7 +51,7 @@ export default function CreatorHome() {
       const data = await api.get("/api/contributions/pending");
       setPendingContributions(data);
     } catch (err) {
-      console.error(err);
+      showToast(err.message, "error");
     }
   }
 
@@ -57,7 +60,7 @@ export default function CreatorHome() {
       await api.put(`/api/contributions/${id}/approve`);
       loadPending();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   }
 
@@ -66,7 +69,7 @@ export default function CreatorHome() {
       await api.put(`/api/contributions/${id}/reject`);
       loadPending();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   }
 
@@ -77,6 +80,11 @@ export default function CreatorHome() {
         <p className="text-sm text-gray-500 mt-1">Welcome back, {user?.name}!</p>
       </div>
 
+      {loadError && (
+        <div className="mb-4 flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {loadError}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {loading ? (
           <>
@@ -130,7 +138,7 @@ export default function CreatorHome() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

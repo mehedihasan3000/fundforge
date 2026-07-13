@@ -1,23 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { Person, TrashBin } from "@gravity-ui/icons";
 
 export default function ManageUsers() {
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     try { setUsers(await api.get("/api/users")); }
-    catch (err) { console.error(err); }
+    catch (err) { setLoadError(err.message); }
   }
 
   async function updateRole(id, role) {
     try {
       await api.put(`/api/users/${id}/role`, { role });
       load();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, "error"); }
   }
 
   async function removeUser(id) {
@@ -25,7 +28,7 @@ export default function ManageUsers() {
     try {
       await api.delete(`/api/users/${id}`);
       load();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, "error"); }
   }
 
   return (
@@ -35,7 +38,12 @@ export default function ManageUsers() {
         <p className="text-sm text-gray-500 mt-1">View, update roles, and manage platform users</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {loadError && (
+        <div className="mb-4 flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {loadError}
+        </div>
+      )}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

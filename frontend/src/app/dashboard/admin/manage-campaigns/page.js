@@ -1,16 +1,19 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { Eye, TrashBin, CircleCheck, Clock, CircleXmark } from "@gravity-ui/icons";
 
 export default function ManageCampaigns() {
+  const { showToast } = useToast();
   const [campaigns, setCampaigns] = useState([]);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     try { setCampaigns(await api.get("/api/campaigns")); }
-    catch (err) { console.error(err); }
+    catch (err) { setLoadError(err.message); }
   }
 
   async function handleDelete(id) {
@@ -18,21 +21,21 @@ export default function ManageCampaigns() {
     try {
       await api.delete(`/api/campaigns/${id}`);
       load();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, "error"); }
   }
 
   async function handleApprove(id) {
     try {
       await api.put(`/api/campaigns/${id}/approve`);
       load();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, "error"); }
   }
 
   async function handleReject(id) {
     try {
       await api.put(`/api/campaigns/${id}/reject`);
       load();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, "error"); }
   }
 
   function getStatusBadge(status) {
@@ -57,7 +60,12 @@ export default function ManageCampaigns() {
         <p className="text-sm text-gray-500 mt-1">Oversee all campaigns on the platform</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {loadError && (
+        <div className="mb-4 flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {loadError}
+        </div>
+      )}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

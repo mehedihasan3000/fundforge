@@ -12,7 +12,20 @@ export default function ExploreCampaigns() {
   const [category, setCategory] = useState("");
   const [deadline, setDeadline] = useState("");
 
-  async function load() {
+  useEffect(() => {
+    async function fetchInitial() {
+      try {
+        const params = new URLSearchParams({ status: "approved" });
+        const data = await api.get(`/api/campaigns?${params}`);
+        setCampaigns(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchInitial();
+  }, []);
+
+  async function handleFilter() {
     try {
       const params = new URLSearchParams({ status: "approved" });
       if (search) params.set("search", search);
@@ -24,10 +37,6 @@ export default function ExploreCampaigns() {
       console.error(err);
     }
   }
-
-  useEffect(() => { load(); }, []);
-
-  function handleFilter() { load(); }
 
   return (
     <div>

@@ -1,23 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { CircleXmark, TrashBin } from "@gravity-ui/icons";
 
 export default function Reports() {
+  const { showToast } = useToast();
   const [reports, setReports] = useState([]);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     try { setReports(await api.get("/api/reports")); }
-    catch (err) { console.error(err); }
+    catch (err) { setLoadError(err.message); }
   }
 
   async function deleteReport(id) {
     try {
       await api.delete(`/api/reports/${id}`);
       load();
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, "error"); }
   }
 
   return (
@@ -27,7 +30,12 @@ export default function Reports() {
         <p className="text-sm text-gray-500 mt-1">Review reported campaigns and take action</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {loadError && (
+        <div className="mb-4 flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {loadError}
+        </div>
+      )}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

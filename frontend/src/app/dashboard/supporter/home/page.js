@@ -102,7 +102,7 @@ export default function SupporterHome() {
 
       <h2 className="text-lg font-bold text-gray-900 mb-4">Approved Contributions</h2>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

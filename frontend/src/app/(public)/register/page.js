@@ -41,7 +41,7 @@ export default function RegisterPage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const res = await fetch("https://api.imgbb.com/1/upload?key=08fa52c2209d62ab836c2de43466515f", {
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`, {
         method: "POST",
         body: formData,
       });

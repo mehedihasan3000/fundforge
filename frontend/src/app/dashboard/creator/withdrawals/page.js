@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { Wallet, CreditCard, CircleExclamation } from "@gravity-ui/icons";
 
 export default function Withdrawals() {
+  const { showToast } = useToast();
   const [earnings, setEarnings] = useState({ raised: 0, dollar: 0 });
+  const [loadError, setLoadError] = useState("");
   const [form, setForm] = useState({ withdrawalCredit: "", paymentSystem: "Stripe", accountNumber: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -16,7 +19,7 @@ export default function Withdrawals() {
         const raised = campaigns.reduce((sum, c) => sum + (c.amountRaised || 0), 0);
         setEarnings({ raised, dollar: raised / 20 });
       } catch (err) {
-        console.error(err);
+        setLoadError(err.message);
       }
     }
     load();
@@ -39,7 +42,7 @@ export default function Withdrawals() {
         paymentSystem: form.paymentSystem,
         accountNumber: form.accountNumber,
       });
-      alert("Withdrawal request submitted!");
+      showToast("Withdrawal request submitted!");
       setForm({ withdrawalCredit: "", paymentSystem: "Stripe", accountNumber: "" });
     } catch (err) {
       setError(err.message);
@@ -55,6 +58,11 @@ export default function Withdrawals() {
         <p className="text-sm text-gray-500 mt-1">Convert your campaign earnings to USD</p>
       </div>
 
+      {loadError && (
+        <div className="mb-4 flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {loadError}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3">

@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { Eye, Xmark, TrashBin } from "@gravity-ui/icons";
 
 export default function MyCampaigns() {
+  const { showToast } = useToast();
   const [campaigns, setCampaigns] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({ title: "", story: "", rewardInfo: "" });
 
@@ -15,7 +18,7 @@ export default function MyCampaigns() {
       const data = await api.get("/api/campaigns/creator/mine");
       setCampaigns(data);
     } catch (err) {
-      console.error(err);
+      setLoadError(err.message);
     }
   }
 
@@ -30,7 +33,7 @@ export default function MyCampaigns() {
       setEditing(null);
       load();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   }
 
@@ -40,7 +43,7 @@ export default function MyCampaigns() {
       await api.delete(`/api/campaigns/${id}`);
       load();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     }
   }
 
@@ -56,7 +59,12 @@ export default function MyCampaigns() {
         <p className="text-sm text-gray-500 mt-1">Manage and track your campaigns</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {loadError && (
+        <div className="mb-4 flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+          {loadError}
+        </div>
+      )}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">

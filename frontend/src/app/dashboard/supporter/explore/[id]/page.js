@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { Eye, CircleExclamation, ArrowChevronLeft, Flag } from "@gravity-ui/icons";
 
@@ -27,6 +28,7 @@ function Skeleton() {
 export default function CampaignDetails() {
   const { id } = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
   const [campaign, setCampaign] = useState(null);
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +59,7 @@ export default function CampaignDetails() {
         creatorName: campaign.creatorName,
         creatorEmail: campaign.creatorEmail,
       });
-      alert("Contribution submitted! Waiting for creator approval.");
+      showToast("Contribution submitted! Waiting for creator approval.");
       router.push("/dashboard/supporter/contributions");
     } catch (err) {
       setError(err.message);
@@ -81,7 +83,7 @@ export default function CampaignDetails() {
       });
       setShowReport(false);
       setReportReason("");
-      alert("Campaign reported. Admin will review it.");
+      showToast("Campaign reported. Admin will review it.");
     } catch (err) {
       setReportError(err.message);
     }
