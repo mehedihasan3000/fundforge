@@ -1,56 +1,94 @@
 const { getDB } = require("../config/db");
 
 const CREDIT_PACKAGES = {
-  "100": 10,
-  "300": 25,
-  "800": 60,
-  "1500": 110,
+  "100": { price: 10, priceId: "price_1TseDTBUtDyQcaIdQSMDpY51" },
+  "300": { price: 25, priceId: "price_1TseDUBUtDyQcaIdVvwpqMAy" },
+  "800": { price: 60, priceId: "price_1TseDUBUtDyQcaIdwUtzZxH3" },
+  "1500": { price: 110, priceId: "price_1TseDUBUtDyQcaIdAtrqX34J" },
 };
 
-async function createPaymentIntent(req, res) {
+async function getStripe() {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    throw new Error("Stripe not configured");
+  }
+  return require("stripe")(stripeSecretKey);
+}
+
+async function createCheckoutSession(req, res) {
   try {
     const { credits } = req.body;
-    const price = CREDIT_PACKAGES[credits];
-    if (!price) {
+    const pkg = CREDIT_PACKAGES[credits];
+    if (!pkg) {
       return res.status(400).json({ message: "Invalid credit package" });
     }
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    if (!stripeSecretKey) {
-      return res.status(500).json({ message: "Stripe not configured" });
-    }
-    const stripe = require("stripe")(stripeSecretKey);
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: price * 100,
-      currency: "usd",
-      metadata: { credits: String(credits), userEmail: req.user.email },
+
+    const stripe = await getStripe();
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [
+        {
+          price: pkg.priceId,
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        credits: String(credits),
+        amount: String(pkg.price),
+        userEmail: req.user.email,
+      },
+      customer_email: req.user.email,
+      success_url: `${frontendUrl}/dashboard/supporter/purchase-credits?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/dashboard/supporter/purchase-credits?canceled=true`,
     });
-    res.json({ clientSecret: paymentIntent.client_secret });
+
+    res.json({ url: session.url });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 }
 
-async function confirmPayment(req, res) {
+async function confirmCheckoutSession(req, res) {
   try {
     const db = getDB();
-    const { credits, amount, stripePaymentId } = req.body;
-    if (!credits || !amount || !stripePaymentId) {
-      return res.status(400).json({ message: "Missing payment info" });
+    const { sessionId } = req.body;
+    if (!sessionId) {
+      return res.status(400).json({ message: "Missing session ID" });
     }
+
+    const stripe = await getStripe();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== "paid") {
+      return res.status(400).json({ message: "Payment not completed" });
+    }
+
+    if (session.metadata.userEmail !== req.user.email) {
+      return res.status(403).json({ message: "Session does not belong to you" });
+    }
+
+    const existing = await db.collection("payments").findOne({ stripePaymentId: sessionId });
+    if (existing) {
+      return res.json({ message: "Payment already confirmed", credits: Number(session.metadata.credits) });
+    }
+
     const payment = {
       userEmail: req.user.email,
       userName: req.user.name,
-      credits: Number(credits),
-      amount: Number(amount),
-      stripePaymentId,
+      credits: Number(session.metadata.credits),
+      amount: Number(session.metadata.amount),
+      stripePaymentId: sessionId,
       date: new Date(),
     };
     await db.collection("payments").insertOne(payment);
     await db.collection("users").updateOne(
       { email: req.user.email },
-      { $inc: { credits: Number(credits) } }
+      { $inc: { credits: Number(session.metadata.credits) } }
     );
-    res.json({ message: "Payment confirmed, credits added" });
+
+    res.json({ message: "Payment confirmed, credits added", credits: Number(session.metadata.credits) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -84,4 +122,4 @@ async function getCreatorPaymentHistory(req, res) {
   }
 }
 
-module.exports = { createPaymentIntent, confirmPayment, getPaymentHistory, getCreatorPaymentHistory };
+module.exports = { createCheckoutSession, confirmCheckoutSession, getPaymentHistory, getCreatorPaymentHistory };

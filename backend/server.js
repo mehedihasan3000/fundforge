@@ -45,8 +45,7 @@ async function start() {
   app.use("/api/reports", reportRoutes);
   app.use("/api/notifications", notificationRoutes);
 
-  app.all("/api/auth/*splat", (req, res, next) => {
-    if (!req.path.startsWith("/api/auth/")) return next();
+  app.all(/^\/api\/auth(\/.*)?$/, (req, res, next) => {
     try {
       const auth = getAuth();
       return toNodeHandler(auth)(req, res);
@@ -54,6 +53,15 @@ async function start() {
       console.error("Auth handler error:", err.message);
       return res.status(500).json({ message: "Auth error" });
     }
+  });
+
+  app.use("/api", (req, res) => {
+    res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
+  });
+
+  app.use((err, req, res, next) => {
+    console.error("Unhandled error:", err.message);
+    res.status(500).json({ message: "Internal server error" });
   });
 
   app.listen(PORT, () => {

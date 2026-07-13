@@ -2,16 +2,16 @@ const express = require("express");
 const { requireSession } = require("../middleware/session");
 const { authorize } = require("../middleware/rbac");
 const {
-  createPaymentIntent,
-  confirmPayment,
+  createCheckoutSession,
+  confirmCheckoutSession,
   getPaymentHistory,
   getCreatorPaymentHistory,
 } = require("../controllers/payments");
 
 const router = express.Router();
 
-router.post("/create-payment-intent", requireSession, authorize("supporter"), createPaymentIntent);
-router.post("/confirm", requireSession, authorize("supporter"), confirmPayment);
+router.post("/create-checkout-session", requireSession, authorize("supporter"), createCheckoutSession);
+router.post("/confirm-checkout-session", requireSession, authorize("supporter"), confirmCheckoutSession);
 router.get("/history", requireSession, authorize("supporter"), getPaymentHistory);
 router.get("/creator-history", requireSession, authorize("creator"), getCreatorPaymentHistory);
 

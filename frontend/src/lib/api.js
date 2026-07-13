@@ -1,12 +1,20 @@
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 async function request(endpoint, options = {}) {
-  const url = `${endpoint}`;
+  const url = `${BASE_URL}${endpoint}`;
   const config = {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     ...options,
   };
   const res = await fetch(url, config);
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
+  }
   if (!res.ok) throw new Error(data.message || "Something went wrong");
   return data;
 }

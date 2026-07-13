@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Wallet, CircleExclamation } from "@gravity-ui/icons";
+import { Plus, Wallet, CircleExclamation, CircleCheck } from "@gravity-ui/icons";
 
 const PACKAGES = [
   { credits: 100, price: 10 },
@@ -12,47 +13,55 @@ const PACKAGES = [
 ];
 
 export default function PurchaseCredits() {
+  return (
+    <Suspense fallback={null}>
+      <PurchaseCreditsInner />
+    </Suspense>
+  );
+}
+
+function PurchaseCreditsInner() {
   const { setCredits } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const sessionId = searchParams.get("session_id");
+    const canceled = searchParams.get("canceled");
+
+    if (sessionId) {
+      confirmSession(sessionId);
+      router.replace("/dashboard/supporter/purchase-credits");
+    }
+
+    if (canceled) {
+      setError("Payment was canceled.");
+      router.replace("/dashboard/supporter/purchase-credits");
+    }
+  }, []);
+
+  async function confirmSession(sessionId) {
+    try {
+      const data = await api.post("/api/payments/confirm-checkout-session", { sessionId });
+      setCredits((prev) => prev + data.credits);
+      setSuccess(`Successfully purchased ${data.credits} credits!`);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   async function handlePurchase(pkg) {
     setLoading(pkg.credits);
     setError("");
+    setSuccess("");
     try {
-      const { clientSecret } = await api.post("/api/payments/create-payment-intent", { credits: pkg.credits });
-      const stripeSecretKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-      if (!stripeSecretKey) {
-        setError("Stripe is not configured");
-        return;
-      }
-      if (!window.Stripe) {
-        await loadStripeScript();
-      }
-      if (!window.Stripe) {
-        setError("Failed to load Stripe");
-        return;
-      }
-      const stripeInstance = window.Stripe(stripeSecretKey);
-      const { error: stripeError, paymentIntent } = await stripeInstance.confirmCardPayment(clientSecret, {
-        payment_method: { card: { token: "tok_visa" } },
-      });
-      if (stripeError) {
-        setError(stripeError.message);
-        return;
-      }
-      if (paymentIntent.status === "succeeded") {
-        await api.post("/api/payments/confirm", {
-          credits: pkg.credits,
-          amount: pkg.price,
-          stripePaymentId: paymentIntent.id,
-        });
-        setCredits((prev) => prev + pkg.credits);
-        alert(`Successfully purchased ${pkg.credits} credits!`);
-      }
+      const { url } = await api.post("/api/payments/create-checkout-session", { credits: pkg.credits });
+      window.location.href = url;
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(null);
     }
   }
@@ -103,6 +112,13 @@ export default function PurchaseCredits() {
         ))}
       </div>
 
+      {success && (
+        <div className="flex items-center gap-2 text-green-600 bg-green-50 border border-green-100 px-4 py-3 rounded-xl text-sm mt-6">
+          <CircleCheck className="w-4 h-4 shrink-0" />
+          {success}
+        </div>
+      )}
+
       {error && (
         <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm mt-6">
           <CircleExclamation className="w-4 h-4 shrink-0" />
@@ -111,16 +127,4 @@ export default function PurchaseCredits() {
       )}
     </div>
   );
-}
-
-async function loadStripeScript() {
-  return new Promise((resolve, reject) => {
-    if (document.getElementById("stripe-js")) return resolve();
-    const script = document.createElement("script");
-    script.id = "stripe-js";
-    script.src = "https://js.stripe.com/v3/";
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
 }
