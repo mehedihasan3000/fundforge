@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const db = getDB();
-    const users = await db.collection("users").countDocuments();
+    const users = await db.collection("user").countDocuments();
     const campaigns = await db.collection("campaigns").countDocuments();
     const payments = await db.collection("payments").aggregate([
       { $group: { _id: null, total: { $sum: "$credits" } } },

@@ -12,7 +12,7 @@ async function createWithdrawal(req, res) {
     if (withdrawalCredit < 200) {
       return res.status(400).json({ message: "Minimum 200 credits required to withdraw" });
     }
-    const user = await db.collection("users").findOne({ email: req.user.email });
+    const user = await db.collection("user").findOne({ email: req.user.email });
     if (!user || user.credits < withdrawalCredit) {
       return res.status(400).json({ message: "Insufficient credits" });
     }
@@ -69,7 +69,7 @@ async function approveWithdrawal(req, res) {
     const withdrawal = await db.collection("withdrawals").findOne({ _id: new ObjectId(id) });
     if (!withdrawal) return res.status(404).json({ message: "Withdrawal not found" });
     await db.collection("withdrawals").updateOne({ _id: new ObjectId(id) }, { $set: { status: "approved" } });
-    await db.collection("users").updateOne(
+    await db.collection("user").updateOne(
       { email: withdrawal.creatorEmail },
       { $inc: { credits: -withdrawal.withdrawalCredit } }
     );
