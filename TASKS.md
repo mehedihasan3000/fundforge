@@ -94,12 +94,12 @@ Only after confirming you understand the relevant sections should you proceed wi
 - [x] Email on contribution confirmation
 - [x] Email on withdrawal processing
 
-## Phase 8: Search, Filter & Report
+## Phase 8: Search, Filter & Report ✅
 
-- [ ] Search/filter UI (category, deadline, fundingGoal, status)
-- [ ] MongoDB aggregation pipeline for server-side filtering
-- [ ] Report system — supporter can report campaigns
-- [ ] Admin reports page — view and manage reported campaigns
+- [x] Search/filter UI (category, deadline, fundingGoal, status)
+- [x] MongoDB aggregation pipeline for server-side filtering
+- [x] Report system — supporter can report campaigns
+- [x] Admin reports page — view and manage reported campaigns
 
 ## Phase 9: Polish & Deployment
 

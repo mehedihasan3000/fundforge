@@ -105,12 +105,31 @@ async function deleteCampaign(req, res) {
 async function getAllCampaigns(req, res) {
   try {
     const db = getDB();
-    const { category, status, search } = req.query;
-    const filter = {};
-    if (category) filter.category = category;
-    if (status) filter.status = status;
-    if (search) filter.title = { $regex: search, $options: "i" };
-    const campaigns = await db.collection("campaigns").find(filter).sort({ createdAt: -1 }).toArray();
+    const { category, status, search, deadline, minGoal, maxGoal } = req.query;
+    const match = {};
+    if (category) match.category = category;
+    if (status) match.status = status;
+    if (search) match.title = { $regex: search, $options: "i" };
+    if (deadline === "active") match.deadline = { $gt: new Date() };
+    if (deadline === "ended") match.deadline = { $lt: new Date() };
+    if (minGoal || maxGoal) {
+      match.fundingGoal = {};
+      if (minGoal) match.fundingGoal.$gte = Number(minGoal);
+      if (maxGoal) match.fundingGoal.$lte = Number(maxGoal);
+    }
+    const campaigns = await db.collection("campaigns").aggregate([
+      { $match: match },
+      { $sort: { createdAt: -1 } },
+      { $addFields: {
+        progress: {
+          $cond: {
+            if: { $gt: ["$fundingGoal", 0] },
+            then: { $multiply: [{ $divide: ["$amountRaised", "$fundingGoal"] }, 100] },
+            else: 0,
+          },
+        },
+      }},
+    ]).toArray();
     res.json(campaigns);
   } catch (err) {
     res.status(500).json({ message: err.message });

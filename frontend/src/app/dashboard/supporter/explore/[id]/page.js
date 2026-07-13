@@ -1,54 +1,51 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
-import { Eye, CircleExclamation, CircleCheck, Clock, Flag, Gift } from "@gravity-ui/icons";
+import { Eye, CircleExclamation, ArrowChevronLeft, Flag } from "@gravity-ui/icons";
+
+function Skeleton() {
+  return (
+    <div className="max-w-3xl animate-pulse">
+      <div className="w-full h-64 bg-gray-200 rounded-xl mb-6" />
+      <div className="h-8 w-2/3 bg-gray-200 rounded-lg mb-2" />
+      <div className="h-4 w-1/3 bg-gray-200 rounded mb-6" />
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white rounded-xl border p-4">
+            <div className="h-3 w-12 bg-gray-200 rounded mb-2" />
+            <div className="h-6 w-20 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+      <div className="h-32 bg-gray-200 rounded-xl mb-6" />
+    </div>
+  );
+}
 
 export default function CampaignDetails() {
   const { id } = useParams();
-  const { credits, setCredits } = useAuth();
+  const router = useRouter();
   const [campaign, setCampaign] = useState(null);
   const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [showReport, setShowReport] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportError, setReportError] = useState("");
 
   useEffect(() => {
-    async function load() {
-      try {
-        const data = await api.get(`/api/campaigns/${id}`);
-        setCampaign(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    api.get(`/api/campaigns/${id}`)
+      .then(setCampaign)
+      .catch((err) => setError(err.message));
   }, [id]);
-
-  function getDaysLeft(deadline) {
-    const diff = new Date(deadline) - new Date();
-    return diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
-  }
-
-  function getProgress(raised, goal) {
-    return Math.min(Math.round((raised / goal) * 100), 100);
-  }
 
   async function handleContribute(e) {
     e.preventDefault();
     setError("");
-    setSuccess("");
-    const contributionAmount = Number(amount);
-    if (!contributionAmount || contributionAmount < campaign.minimumContribution) {
+    if (!amount || Number(amount) < campaign.minimumContribution) {
       setError(`Minimum contribution is ${campaign.minimumContribution} credits`);
-      return;
-    }
-    if (contributionAmount > credits) {
-      setError("Insufficient credits. Please purchase more credits.");
       return;
     }
     setSubmitting(true);
@@ -56,13 +53,12 @@ export default function CampaignDetails() {
       await api.post("/api/contributions", {
         campaignId: id,
         campaignTitle: campaign.title,
-        contributionAmount,
+        contributionAmount: Number(amount),
         creatorName: campaign.creatorName,
         creatorEmail: campaign.creatorEmail,
       });
-      setCredits((prev) => prev - contributionAmount);
-      setSuccess(`Successfully contributed ${contributionAmount} credits to "${campaign.title}"!`);
-      setAmount("");
+      alert("Contribution submitted! Waiting for creator approval.");
+      router.push("/dashboard/supporter/contributions");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -70,144 +66,160 @@ export default function CampaignDetails() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
-    );
+  async function handleReport(e) {
+    e.preventDefault();
+    setReportError("");
+    if (!reportReason.trim()) {
+      setReportError("Please provide a reason");
+      return;
+    }
+    try {
+      await api.post("/api/reports", {
+        campaignId: id,
+        campaignTitle: campaign.title,
+        reason: reportReason,
+      });
+      setShowReport(false);
+      setReportReason("");
+      alert("Campaign reported. Admin will review it.");
+    } catch (err) {
+      setReportError(err.message);
+    }
   }
 
-  if (!campaign) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-        <Eye className="w-12 h-12 mb-3" />
-        <p className="text-sm">Campaign not found</p>
-      </div>
-    );
-  }
+  if (!campaign) return <Skeleton />;
 
-  const daysLeft = getDaysLeft(campaign.deadline);
-  const progress = getProgress(campaign.amountRaised || 0, campaign.fundingGoal);
+  const progress = Math.min(Math.round(((campaign.amountRaised || 0) / campaign.fundingGoal) * 100), 100);
+  const daysLeft = Math.ceil((new Date(campaign.deadline) - new Date()) / (1000 * 60 * 60 * 24));
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        {campaign.imageUrl ? (
-          <img src={campaign.imageUrl} alt={campaign.title} className="w-full h-64 md:h-80 object-cover" />
-        ) : (
-          <div className="w-full h-64 md:h-80 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-            <Eye className="w-16 h-16 text-indigo-300" />
-          </div>
-        )}
+    <div className="max-w-3xl">
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/dashboard/supporter/explore"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <ArrowChevronLeft className="w-4 h-4" />
+          Back to Explore
+        </Link>
+        <button
+          onClick={() => setShowReport(true)}
+          className="inline-flex items-center gap-1 text-sm text-red-500 hover:text-red-700 transition-colors"
+        >
+          <Flag className="w-4 h-4" />
+          Report
+        </button>
+      </div>
 
-        <div className="p-6 md:p-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="bg-indigo-100 text-indigo-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
-              {campaign.category}
-            </span>
-            {daysLeft > 0 && daysLeft <= 7 && (
-              <span className="bg-red-100 text-red-600 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {daysLeft} days left
-              </span>
-            )}
-          </div>
+      {campaign.imageUrl && (
+        <img src={campaign.imageUrl} alt={campaign.title} className="w-full h-64 object-cover rounded-xl mb-6" />
+      )}
 
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{campaign.title}</h1>
-          <p className="text-sm text-gray-500 mb-6">by {campaign.creatorName}</p>
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">{campaign.title}</h1>
+          <p className="text-sm text-gray-500">by {campaign.creatorName} · <span className="text-indigo-600">{campaign.category}</span></p>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+          daysLeft > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+        }`}>
+          {daysLeft > 0 ? `${daysLeft} days left` : "Ended"}
+        </span>
+      </div>
 
-          <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
-            <div className="bg-indigo-600 rounded-full h-3 transition-all" style={{ width: `${progress}%` }} />
-          </div>
-          <div className="flex items-center justify-between text-sm mb-6">
-            <span className="font-semibold text-indigo-700">{campaign.amountRaised || 0} cr raised</span>
-            <span className="text-gray-500">{progress}% of {campaign.fundingGoal} cr goal</span>
-          </div>
+      <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
+        <div className="bg-indigo-600 rounded-full h-3 transition-all" style={{ width: `${progress}%` }} />
+      </div>
+      <p className="text-sm text-gray-500 mb-6">{progress}% funded · {campaign.amountRaised || 0} of {campaign.fundingGoal} credits raised</p>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <Flag className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
-              <p className="text-xs text-gray-500">Goal</p>
-              <p className="font-semibold text-gray-900">{campaign.fundingGoal} cr</p>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <Clock className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
-              <p className="text-xs text-gray-500">Days Left</p>
-              <p className="font-semibold text-gray-900">{daysLeft || "Ended"}</p>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <Gift className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
-              <p className="text-xs text-gray-500">Min Contribution</p>
-              <p className="font-semibold text-gray-900">{campaign.minimumContribution} cr</p>
-            </div>
-          </div>
-
-          {campaign.rewardInfo && (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Rewards</h2>
-              <p className="text-sm text-gray-600 bg-amber-50 border border-amber-100 rounded-lg p-4">
-                {campaign.rewardInfo}
-              </p>
-            </div>
-          )}
-
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Story</h2>
-            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-              {campaign.story}
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Contribute to this Campaign</h2>
-            <form onSubmit={handleContribute} className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="relative flex-1 w-full sm:max-w-xs">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter credits"
-                  min={campaign.minimumContribution}
-                  max={credits}
-                  className="w-full px-4 py-2.5 border bg-white text-gray-900 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium text-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? (
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                ) : null}
-                {submitting ? "Processing..." : "Contribute Now"}
-              </button>
-              <p className="text-xs text-gray-400">Available: {credits} credits</p>
-            </form>
-          </div>
-
-          {success && (
-            <div className="flex items-center gap-2 text-green-600 bg-green-50 border border-green-100 px-4 py-3 rounded-xl text-sm mt-4">
-              <CircleCheck className="w-4 h-4 shrink-0" />
-              {success}
-            </div>
-          )}
-
-          {error && (
-            <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm mt-4">
-              <CircleExclamation className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
-          )}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Goal</p>
+          <p className="text-xl font-bold text-gray-900">{campaign.fundingGoal} cr</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Raised</p>
+          <p className="text-xl font-bold text-indigo-600">{campaign.amountRaised || 0} cr</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Deadline</p>
+          <p className="text-xl font-bold text-gray-900">{new Date(campaign.deadline).toLocaleDateString()}</p>
         </div>
       </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">Story</h2>
+        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{campaign.story}</p>
+      </div>
+
+      {campaign.rewardInfo && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-3">Rewards</h2>
+          <p className="text-gray-700">{campaign.rewardInfo}</p>
+        </div>
+      )}
+
+      {daysLeft > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Make a Contribution</h2>
+          <form onSubmit={handleContribute} className="space-y-4 max-w-sm">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Amount (min: {campaign.minimumContribution} credits)
+              </label>
+              <input
+                type="number"
+                required
+                min={campaign.minimumContribution}
+                className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                placeholder="Enter amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+            {error && (
+              <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 px-4 py-3 rounded-xl text-sm">
+                <CircleExclamation className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/25"
+            >
+              <Eye className="w-4 h-4" />
+              {submitting ? "Processing..." : "Contribute"}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {showReport && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowReport(false)}>
+          <div className="bg-white rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Report Campaign</h2>
+            <form onSubmit={handleReport} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Reason</label>
+                <textarea
+                  required
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm"
+                  placeholder="Why are you reporting this campaign?"
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                />
+              </div>
+              {reportError && <p className="text-red-500 text-sm">{reportError}</p>}
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setShowReport(false)} className="px-4 py-2 text-sm border rounded-lg">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">Submit Report</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
