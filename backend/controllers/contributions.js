@@ -9,11 +9,11 @@ async function createContribution(req, res) {
     if (!campaignId || !contributionAmount) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    const supporter = await db.collection("users").findOne({ email: req.user.email });
+    const supporter = await db.collection("user").findOne({ email: req.user.email });
     if (!supporter || supporter.credits < contributionAmount) {
       return res.status(400).json({ message: "Insufficient credits" });
     }
-    await db.collection("users").updateOne(
+    await db.collection("user").updateOne(
       { email: req.user.email },
       { $inc: { credits: -contributionAmount } }
     );
@@ -86,7 +86,7 @@ async function rejectContribution(req, res) {
     const contribution = await db.collection("contributions").findOne({ _id: new ObjectId(id) });
     if (!contribution) return res.status(404).json({ message: "Contribution not found" });
     await db.collection("contributions").updateOne({ _id: new ObjectId(id) }, { $set: { status: "rejected" } });
-    await db.collection("users").updateOne(
+    await db.collection("user").updateOne(
       { email: contribution.supporterEmail },
       { $inc: { credits: contribution.contributionAmount } }
     );

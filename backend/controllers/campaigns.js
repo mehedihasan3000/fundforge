@@ -89,7 +89,7 @@ async function deleteCampaign(req, res) {
     }
     const contributions = await db.collection("contributions").find({ campaignId: id, status: "approved" }).toArray();
     for (const c of contributions) {
-      await db.collection("users").updateOne(
+      await db.collection("user").updateOne(
         { email: c.supporterEmail },
         { $inc: { credits: c.contributionAmount } }
       );
