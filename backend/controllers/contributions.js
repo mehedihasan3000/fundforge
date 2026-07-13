@@ -67,6 +67,10 @@ async function approveContribution(req, res) {
       { _id: new ObjectId(contribution.campaignId) },
       { $inc: { amountRaised: contribution.contributionAmount } }
     );
+    await db.collection("user").updateOne(
+      { email: contribution.creatorEmail },
+      { $inc: { credits: contribution.contributionAmount } }
+    );
     await db.collection("notifications").insertOne({
       message: `Your contribution of ${contribution.contributionAmount} credits to "${contribution.campaignTitle}" was approved by ${req.user.name}`,
       toEmail: contribution.supporterEmail,

@@ -12,8 +12,18 @@ async function createWithdrawal(req, res) {
     if (withdrawalCredit < 200) {
       return res.status(400).json({ message: "Minimum 200 credits required to withdraw" });
     }
-    const user = await db.collection("user").findOne({ email: req.user.email });
-    if (!user || user.credits < withdrawalCredit) {
+    const totalRaised = await db.collection("campaigns").aggregate([
+      { $match: { creatorEmail: req.user.email } },
+      { $group: { _id: null, total: { $sum: "$amountRaised" } } },
+    ]).toArray();
+    const raisedCredits = totalRaised.length > 0 ? totalRaised[0].total : 0;
+    const approved = await db.collection("withdrawals").aggregate([
+      { $match: { creatorEmail: req.user.email, status: { $in: ["approved", "pending"] } } },
+      { $group: { _id: null, total: { $sum: "$withdrawalCredit" } } },
+    ]).toArray();
+    const withdrawn = approved.length > 0 ? approved[0].total : 0;
+    const available = raisedCredits - withdrawn;
+    if (available < withdrawalCredit) {
       return res.status(400).json({ message: "Insufficient credits" });
     }
     const withdrawalAmount = withdrawalCredit / 20;

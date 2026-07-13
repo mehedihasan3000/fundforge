@@ -34,7 +34,7 @@ export default function NotificationPopup() {
 
       {open && (
         <div className="absolute right-0 top-8 w-80 bg-white border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-          <div className="p-3 border-b font-semibold text-sm">Notifications</div>
+          <div className="p-3 border-b font-semibold text-sm text-gray-400">Notifications</div>
           {notifications.length === 0 ? (
             <div className="p-4 text-sm text-gray-500 text-center">No notifications</div>
           ) : (
@@ -45,7 +45,7 @@ export default function NotificationPopup() {
                 onClick={() => setOpen(false)}
                 className="block p-3 border-b last:border-0 hover:bg-gray-50"
               >
-                <p className="text-sm">{n.message}</p>
+                <p className="text-sm text-gray-600">{n.message}</p>
                 <p className="text-xs text-gray-400 mt-1">{new Date(n.time).toLocaleString()}</p>
               </Link>
             ))

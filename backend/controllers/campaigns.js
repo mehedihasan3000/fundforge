@@ -93,6 +93,10 @@ async function deleteCampaign(req, res) {
         { email: c.supporterEmail },
         { $inc: { credits: c.contributionAmount } }
       );
+      await db.collection("user").updateOne(
+        { email: c.creatorEmail },
+        { $inc: { credits: -c.contributionAmount } }
+      );
     }
     await db.collection("contributions").deleteMany({ campaignId: id });
     await db.collection("campaigns").deleteOne({ _id: new ObjectId(id) });

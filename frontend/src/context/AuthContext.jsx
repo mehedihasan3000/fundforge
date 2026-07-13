@@ -50,6 +50,18 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const refreshUser = async () => {
+    try {
+      const { data: session } = await authClient.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        setCredits(session.user.credits || 0);
+      }
+    } catch (err) {
+      console.error("Refresh user error:", err);
+    }
+  };
+
   const logout = async () => {
     await authClient.signOut();
     setUser(null);
@@ -57,7 +69,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, credits, loading, login, loginWithGoogle, register, logout, setUser, setCredits }}>
+    <AuthContext.Provider value={{ user, credits, loading, login, loginWithGoogle, register, logout, refreshUser, setUser, setCredits }}>
       {children}
     </AuthContext.Provider>
   );

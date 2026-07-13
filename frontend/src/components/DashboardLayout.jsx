@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { Person, Xmark, LogoGithub, CreditCard, Wallet, ChartLine, Plus, Eye, CircleCheck, CircleXmark } from "@gravity-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import NotificationPopup from "@/components/NotificationPopup";
@@ -9,8 +10,14 @@ import NotificationPopup from "@/components/NotificationPopup";
 const GITHUB_REPO = "https://github.com/mehedihasan3000/fundforge";
 
 export default function DashboardLayout({ children }) {
-  const { user, credits, logout, loading } = useAuth();
+  const { user, credits, logout, loading, refreshUser } = useAuth();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const onVisible = () => { if (!document.hidden) refreshUser(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 
   if (loading) {
     return (
@@ -51,14 +58,14 @@ export default function DashboardLayout({ children }) {
 
         <div className="flex items-center gap-3 px-4 py-3 border-b">
           <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-600 overflow-hidden">
-            {user.photoUrl ? (
-              <img src={user.photoUrl} alt="" className="w-full h-full object-cover" />
+            {user?.image ? (
+              <img src={user.image} alt="" className="w-full h-full object-cover" />
             ) : (
               <Person className="w-4 h-4" />
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-medium truncate">{user.name}</p>
+            <p className="text-sm text-gray-700 font-semibold truncate">{user?.name}</p>
             <p className="text-xs text-gray-500 capitalize">{role}</p>
           </div>
         </div>
