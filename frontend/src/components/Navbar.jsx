@@ -5,7 +5,7 @@ import Link from "next/link";
 import { LogoGithub, Person, Xmark, Bars } from "@gravity-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 
-const GITHUB_REPO = "https://github.com/your-username/fundforge";
+const GITHUB_REPO = "https://github.com/mehedihasan3000/fundforge";
 
 export default function Navbar() {
   const { user, credits, logout } = useAuth();
@@ -53,9 +53,18 @@ export default function Navbar() {
 
             {isLoggedIn ? (
               <>
-                <span className="text-sm font-medium text-green-600">{credits} Credits</span>
+                <span className="text-sm font-semibold text-green-600">{credits} Credits</span>
                 <div className="flex items-center gap-2">
-                  <Person className="w-4 h-4 text-gray-500 shrink-0" />
+                  {/* <Person className="w-4 h-4 text-gray-500 shrink-0" /> */}
+
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold overflow-hidden flex-shrink-0">
+                    {user?.image ? (
+                      <img src={user.image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      user.name?.charAt(0)?.toUpperCase() || <Person className="w-4 h-4" />
+                    )}
+                  </div>
+
                   <span className="text-sm text-gray-700 truncate max-w-[100px]">{user.name}</span>
                   <button onClick={logout} className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1">
                     <Xmark className="w-4 h-4" />

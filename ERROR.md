@@ -1,0 +1,1 @@
+I paste error here, then Ai Agent read and analyze error from this .md file
