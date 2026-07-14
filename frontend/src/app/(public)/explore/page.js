@@ -2,12 +2,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { api } from "@/lib/api";
 import { Eye, Magnifier } from "@gravity-ui/icons";
 
 const CATEGORIES = ["Technology", "Art", "Community", "Health", "Education", "Environment"];
 
-export default function ExploreCampaigns() {
+export default function PublicExploreCampaigns() {
   const [campaigns, setCampaigns] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -17,7 +16,7 @@ export default function ExploreCampaigns() {
     async function fetchInitial() {
       try {
         const params = new URLSearchParams({ status: "approved" });
-        const data = await api.get(`/api/campaigns?${params}`);
+        const data = await fetch(`/api/campaigns?${params}`).then((r) => r.json());
         setCampaigns(data);
       } catch (err) {
         console.error(err);
@@ -32,7 +31,7 @@ export default function ExploreCampaigns() {
       if (search) params.set("search", search);
       if (category) params.set("category", category);
       if (deadline) params.set("deadline", deadline);
-      const data = await api.get(`/api/campaigns?${params}`);
+      const data = await fetch(`/api/campaigns?${params}`).then((r) => r.json());
       setCampaigns(data);
     } catch (err) {
       console.error(err);
@@ -40,13 +39,13 @@ export default function ExploreCampaigns() {
   }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Explore Campaigns</h1>
-        <p className="text-sm text-gray-500 mt-1">Discover and support amazing projects</p>
+    <div className="bg-gray-100 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Explore Campaigns</h1>
+        <p className="text-sm text-gray-500 mt-1">Discover amazing projects and causes</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 flex flex-wrap gap-3 items-end">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-8 flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-50">
           <label className="block text-xs font-medium text-gray-500 mb-1">Search</label>
           <div className="relative">
@@ -85,7 +84,7 @@ export default function ExploreCampaigns() {
         </div>
         <button
           onClick={handleFilter}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700"
+          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 cursor-pointer"
         >
           Filter
         </button>
@@ -98,7 +97,7 @@ export default function ExploreCampaigns() {
           return (
             <div key={c._id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col">
               {c.imageUrl ? (
-                  <div className="relative w-full h-48">
+                <div className="relative w-full h-48">
                   <Image src={c.imageUrl} alt={c.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" unoptimized />
                   <span className="absolute top-3 left-3 bg-indigo-600 text-white text-xs font-medium px-2.5 py-0.5 rounded-full">{c.category}</span>
                   {daysLeft <= 7 && daysLeft > 0 && (
@@ -125,7 +124,7 @@ export default function ExploreCampaigns() {
                   <span>{daysLeft > 0 ? `${daysLeft} days left` : "Ended"}</span>
                 </div>
                 <Link
-                  href={`/dashboard/supporter/explore/${c._id}`}
+                  href={`/explore/${c._id}`}
                   className="mt-auto inline-flex items-center justify-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
                 >
                   <Eye className="w-4 h-4" />
