@@ -83,7 +83,10 @@ async function deleteCampaign(req, res) {
   try {
     const db = getDB();
     const { id } = req.params;
-    const campaign = await db.collection("campaigns").findOne({ _id: new ObjectId(id), creatorEmail: req.user.email });
+    const query = req.user.role === "admin"
+      ? { _id: new ObjectId(id) }
+      : { _id: new ObjectId(id), creatorEmail: req.user.email };
+    const campaign = await db.collection("campaigns").findOne(query);
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
     }

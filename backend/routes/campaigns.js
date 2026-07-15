@@ -21,7 +21,7 @@ router.get("/", getAllCampaigns);
 router.get("/:id", getCampaignById);
 router.post("/", requireSession, authorize("creator"), createCampaign);
 router.put("/:id", requireSession, authorize("creator"), updateCampaign);
-router.delete("/:id", requireSession, authorize("creator"), deleteCampaign);
+router.delete("/:id", requireSession, authorize("admin", "creator"), deleteCampaign);
 router.put("/:id/approve", requireSession, authorize("admin"), approveCampaign);
 router.put("/:id/reject", requireSession, authorize("admin"), rejectCampaign);
 
