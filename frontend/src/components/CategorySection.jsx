@@ -13,7 +13,7 @@ const categories = [
 
 export default function CategorySection() {
   return (
-    <section className="relative py-20 px-4 overflow-hidden">
+    <section className="relative py-20 px-4 overflow-hidden bg-gradient-to-b from-white to-gray-50/50">
       {/* Dot grid background */}
       <div
         className="absolute inset-0 opacity-[0.03]"

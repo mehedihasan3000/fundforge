@@ -39,23 +39,33 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="relative py-20 px-4 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-purple-100/60 blur-3xl pointer-events-none" />
+    <section className="relative py-20 px-4 overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-800">
+      {/* Floating orbs */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-white/[0.06] blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-white/[0.06] blur-3xl pointer-events-none" />
+
+      {/* Dot grid */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+        aria-hidden="true"
+      />
 
       {/* Connecting line (desktop) */}
-      <div className="hidden lg:block absolute top-1/2 left-[calc(12.5%+3rem)] right-[calc(12.5%+3rem)] h-px bg-gradient-to-r from-violet-300 via-blue-300 via-emerald-300 to-amber-300 pointer-events-none" aria-hidden="true" />
+      <div className="hidden lg:block absolute top-1/2 left-[calc(12.5%+3rem)] right-[calc(12.5%+3rem)] h-px bg-gradient-to-r from-white/20 via-white/10 to-white/20 pointer-events-none" aria-hidden="true" />
 
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-200 bg-white/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4">
             Simple Process
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-slide-up">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 animate-slide-up">
             How It Works
           </h2>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+          <p className="text-lg text-indigo-200 max-w-xl mx-auto">
             From sign-up to pay-out, getting started takes just a few clicks.
           </p>
         </div>
@@ -64,16 +74,16 @@ export default function HowItWorks() {
           {steps.map((step, i) => (
             <div
               key={i}
-              className="group relative flex flex-col items-center text-center p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 animate-slide-up"
+              className="group relative flex flex-col items-center text-center p-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 animate-slide-up"
               style={{ animationDelay: `${i * 0.15}s` }}
             >
               {/* Hover glow */}
               <div
-                className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${step.glow} opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none`}
+                className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${step.glow} opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none`}
               />
 
               {/* Step number */}
-              <span className="text-4xl font-black bg-gradient-to-br ${step.gradient} bg-clip-text text-transparent opacity-20 group-hover:opacity-40 transition-opacity mb-2 select-none">
+              <span className="text-4xl font-black bg-gradient-to-br ${step.gradient} bg-clip-text text-transparent opacity-40 group-hover:opacity-60 transition-opacity mb-2 select-none">
                 {step.num}
               </span>
 
@@ -84,8 +94,8 @@ export default function HowItWorks() {
                 {step.icon}
               </div>
 
-              <h3 className="font-bold text-lg text-gray-900 mb-2">{step.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
+              <h3 className="font-bold text-lg text-white mb-2">{step.title}</h3>
+              <p className="text-sm text-white/70 leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>
