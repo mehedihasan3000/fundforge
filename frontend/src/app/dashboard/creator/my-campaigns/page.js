@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
-import { Eye, Xmark, TrashBin } from "@gravity-ui/icons";
+import { Eye, Xmark, TrashBin, Pencil } from "@gravity-ui/icons";
 
 export default function MyCampaigns() {
   const { showToast } = useToast();
@@ -90,7 +90,7 @@ export default function MyCampaigns() {
                       onClick={() => startEdit(c)}
                       className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 px-2.5 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Pencil className="w-3.5 h-3.5" />
                       Update
                     </button>
                     <button
@@ -151,7 +151,7 @@ export default function MyCampaigns() {
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">Cancel</button>
+              <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm font-medium border text-gray-700 border-gray-300 rounded-xl hover:bg-gray-100 transition-colors">Cancel</button>
               <button onClick={() => saveEdit(editing)} className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors">Save</button>
             </div>
           </div>
